@@ -1,6 +1,5 @@
 
 import { auth } from "@/auth";
-import { getDemoPayPalMonthly } from "@/lib/demo-responses";
 import { prisma } from "@/lib/prisma";
 import { connection, NextResponse } from "next/server";
 
@@ -8,27 +7,28 @@ export async function GET(request: Request) {
   await connection();
 
   try {
-    const { searchParams } = new URL(request.url);
-    const monthsParam = searchParams.get("months") ?? "12";
-
-    if (!["3", "6", "12"].includes(monthsParam)) {
-      return NextResponse.json(
-        { error: "months must be 3, 6, or 12" },
-        { status: 400 }
-      );
-    }
-
-    const numberOfMonths = Number(monthsParam);
-
     const session = await auth();
     const userId = session?.user?.id;
 
     if (!userId) {
       return NextResponse.json(
-        getDemoPayPalMonthly(numberOfMonths)
+        { error: "Unauthorized" },
+        { status: 401 }
       );
     }
 
+    
+const { searchParams } = new URL(request.url);
+const monthsParam = searchParams.get("months") ?? "12";
+
+if (!["3", "6", "12"].includes(monthsParam)) {
+  return NextResponse.json(
+    { error: "months must be 3, 6, or 12" },
+    { status: 400 }
+  );
+}
+
+const numberOfMonths = Number(monthsParam);
 const now = new Date();
 
 const startDate = new Date(

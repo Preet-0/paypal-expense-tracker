@@ -1,6 +1,5 @@
 
 import { auth } from "@/auth";
-import { getDemoPayPalCsv } from "@/lib/demo-responses";
 import { prisma } from "@/lib/prisma";
 import { connection, NextResponse } from "next/server";
 
@@ -22,16 +21,10 @@ export async function GET() {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return new Response("\uFEFF" + getDemoPayPalCsv(), {
-        status: 200,
-        headers: {
-          "Content-Type": "text/csv; charset=utf-8",
-          "Content-Disposition":
-            'attachment; filename="paypal-transactions.csv"',
-          "Cache-Control": "private, no-store",
-          "X-Content-Type-Options": "nosniff",
-        },
-      });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     const orders = await prisma.payPalOrder.findMany({

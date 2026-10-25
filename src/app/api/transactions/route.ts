@@ -1,6 +1,5 @@
 
 import { auth } from "@/auth";
-import { getDemoTransactions } from "@/lib/demo-responses";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { connection, NextResponse } from "next/server";
@@ -12,11 +11,10 @@ export async function GET() {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({
-        status: "ok",
-        demo: true,
-        transactions: getDemoTransactions(),
-      });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     const transactions = await prisma.transaction.findMany({
