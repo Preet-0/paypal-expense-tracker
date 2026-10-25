@@ -1,5 +1,6 @@
 
 import { auth } from "@/auth";
+import { demoCategories } from "@/lib/demo-responses";
 import { prisma } from "@/lib/prisma";
 import { connection, NextResponse } from "next/server";
 
@@ -18,10 +19,10 @@ export async function GET() {
   const session = await auth();
 
   if (!session?.user?.id) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
+    return NextResponse.json({
+      demo: true,
+      categories: demoCategories,
+    });
   }
 
   try {

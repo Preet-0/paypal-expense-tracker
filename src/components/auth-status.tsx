@@ -52,13 +52,19 @@ export default function AuthStatus() {
 
   if (!session?.user) {
     return (
-      <Link
-        href="/login"
-        className="flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
-      >
-        <LogIn size={16} />
-        Sign in
-      </Link>
+      <div className="space-y-2">
+        <p className="text-[11px] text-slate-500">
+          You are viewing demo data.
+        </p>
+
+        <Link
+          href="/login"
+          className="flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
+        >
+          <LogIn size={16} />
+          Sign in
+        </Link>
+      </div>
     );
   }
 

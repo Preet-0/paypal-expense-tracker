@@ -1,5 +1,6 @@
 
 import { auth } from "@/auth";
+import { getDemoPayPalAnalytics } from "@/lib/demo-responses";
 import { prisma } from "@/lib/prisma";
 import { connection, NextResponse } from "next/server";
 
@@ -11,10 +12,7 @@ export async function GET() {
     const userId = session?.user?.id;
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json(getDemoPayPalAnalytics());
     }
 
     const orders = await prisma.payPalOrder.findMany({

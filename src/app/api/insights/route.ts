@@ -1,5 +1,6 @@
 
 import { auth } from "@/auth";
+import { getDemoInsights } from "@/lib/demo-responses";
 import { prisma } from "@/lib/prisma";
 import { connection, NextResponse } from "next/server";
 
@@ -10,10 +11,7 @@ export async function GET() {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json(getDemoInsights());
     }
 
     const now = new Date();
