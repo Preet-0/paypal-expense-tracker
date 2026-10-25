@@ -1,7 +1,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { connection, NextResponse } from "next/server";
 
 function csvCell(value: string | number) {
   const text = String(value);
@@ -15,6 +15,8 @@ function csvCell(value: string | number) {
 }
 
 export async function GET() {
+  await connection();
+
   try {
     const session = await auth();
 

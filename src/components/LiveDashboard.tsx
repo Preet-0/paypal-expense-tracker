@@ -2,6 +2,10 @@
 "use client";
 
 import {
+  apiFetch,
+  getErrorMessage,
+} from "@/lib/api-client";
+import {
   ArrowRight,
   ArrowUpRight,
   CalendarDays,
@@ -55,34 +59,48 @@ export default function LiveDashboard() {
     setError("");
 
     try {
-      const response = await fetch("/api/analytics", {
-        cache: "no-store",
-      });
+      const result = await apiFetch<AnalyticsData>(
+        "/api/analytics",
+        "Unable to load dashboard data.",
+        "Please sign in to view your dashboard."
+      );
 
-      if (!response.ok) {
-        throw new Error(
-          response.status === 401
-            ? "Please sign in to view your dashboard."
-            : "Unable to load dashboard data."
-        );
-      }
-
-      const result: AnalyticsData = await response.json();
       setData(result);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong."
-      );
+      setError(getErrorMessage(err, "Something went wrong."));
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    void loadDashboard();
-  }, [loadDashboard]);
+    let active = true;
+
+    apiFetch<AnalyticsData>(
+      "/api/analytics",
+      "Unable to load dashboard data.",
+      "Please sign in to view your dashboard."
+    )
+      .then((result) => {
+        if (active) {
+          setData(result);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setError(getErrorMessage(err, "Something went wrong."));
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const change = data?.monthlyChangePercent ?? null;
   const spendingDown = change !== null && change < 0;

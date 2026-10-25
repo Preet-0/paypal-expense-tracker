@@ -1,7 +1,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { connection, NextResponse } from "next/server";
 
 const DEFAULT_CATEGORIES = [
   "Food",
@@ -13,6 +13,8 @@ const DEFAULT_CATEGORIES = [
 ];
 
 export async function GET() {
+  await connection();
+
   const session = await auth();
 
   if (!session?.user?.id) {

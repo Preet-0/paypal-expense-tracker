@@ -2,6 +2,10 @@
 "use client";
 
 import {
+  apiFetch,
+  getErrorMessage,
+} from "@/lib/api-client";
+import {
     ArrowDownRight,
     ArrowUpRight,
     BrainCircuit,
@@ -70,36 +74,50 @@ export default function ExpenseInsights() {
     setError("");
 
     try {
-      const response = await fetch("/api/insights", {
-        cache: "no-store",
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          response.status === 401
-            ? "Please sign in to view your insights."
-            : "Unable to load expense insights."
-        );
-      }
-
-      const result: InsightsResponse =
-        await response.json();
+      const result = await apiFetch<InsightsResponse>(
+        "/api/insights",
+        "Unable to load expense insights.",
+        "Please sign in to view your insights."
+      );
 
       setData(result);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Unable to load insights."
-      );
+      setError(getErrorMessage(err, "Unable to load insights."));
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    void loadInsights();
-  }, [loadInsights]);
+    let active = true;
+
+    apiFetch<InsightsResponse>(
+      "/api/insights",
+      "Unable to load expense insights.",
+      "Please sign in to view your insights."
+    )
+      .then((result) => {
+        if (active) {
+          setData(result);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setError(
+            getErrorMessage(err, "Unable to load insights.")
+          );
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const savingsTarget = data
     ? data.currentMonthSpent * 0.1

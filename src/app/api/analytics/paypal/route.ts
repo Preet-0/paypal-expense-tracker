@@ -1,9 +1,11 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { connection, NextResponse } from "next/server";
 
 export async function GET() {
+  await connection();
+
   try {
     const session = await auth();
     const userId = session?.user?.id;

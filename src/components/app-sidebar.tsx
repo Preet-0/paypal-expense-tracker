@@ -17,6 +17,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import AuthStatus from "@/components/auth-status";
+
 const navigation = [
   {
     name: "Dashboard",
@@ -184,6 +186,10 @@ export default function AppSidebar() {
 
       {/* Footer */}
       <div className="border-t border-white/10 px-6 py-5">
+        <div className="mb-4">
+          <AuthStatus />
+        </div>
+
         <div className="flex items-center gap-2">
           <ShieldCheck
             size={17}

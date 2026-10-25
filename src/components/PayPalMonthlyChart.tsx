@@ -2,6 +2,10 @@
 "use client";
 
 import {
+  apiFetch,
+  getErrorMessage,
+} from "@/lib/api-client";
+import {
     CreditCard,
     RefreshCw,
     TrendingUp,
@@ -54,29 +58,15 @@ export default function PayPalMonthlyChart() {
       setError("");
 
       try {
-        const response = await fetch(
+        const result = await apiFetch<MonthlyResponse>(
           `/api/analytics/paypal/monthly?months=${months}`,
-          { cache: "no-store" }
+          "Unable to load chart",
+          "Please sign in to view PayPal analytics."
         );
-
-        if (!response.ok) {
-          throw new Error(
-            response.status === 401
-              ? "Please sign in to view PayPal analytics."
-              : `Unable to load chart (${response.status})`
-          );
-        }
-
-        const result: MonthlyResponse =
-          await response.json();
 
         setData(result);
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Unable to load chart"
-        );
+        setError(getErrorMessage(err, "Unable to load chart"));
       } finally {
         setLoading(false);
       }
@@ -85,8 +75,34 @@ export default function PayPalMonthlyChart() {
   );
 
   useEffect(() => {
-    void loadChart(period);
-  }, [loadChart, period]);
+    let active = true;
+
+    apiFetch<MonthlyResponse>(
+      `/api/analytics/paypal/monthly?months=${period}`,
+      "Unable to load chart",
+      "Please sign in to view PayPal analytics."
+    )
+      .then((result) => {
+        if (active) {
+          setData(result);
+          setError("");
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setError(getErrorMessage(err, "Unable to load chart"));
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [period]);
 
   const totalSpending =
     data?.months.reduce(
@@ -138,7 +154,10 @@ export default function PayPalMonthlyChart() {
           <button
             key={months}
             type="button"
-            onClick={() => setPeriod(months)}
+            onClick={() => {
+              setLoading(true);
+              setPeriod(months);
+            }}
             aria-pressed={period === months}
             className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
               period === months

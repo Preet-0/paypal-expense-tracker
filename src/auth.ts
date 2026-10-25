@@ -19,6 +19,7 @@ providers: [
 
   pages: {
     signIn: "/login",
+    error: "/login",
   },
 
   callbacks: {

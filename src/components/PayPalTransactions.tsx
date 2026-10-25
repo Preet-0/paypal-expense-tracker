@@ -2,6 +2,10 @@
 "use client";
 
 import {
+  apiFetch,
+  getErrorMessage,
+} from "@/lib/api-client";
+import {
     CheckCircle2,
     CreditCard,
     Download,
@@ -56,37 +60,50 @@ export default function PayPalTransactions() {
     setError("");
 
     try {
-      const response = await fetch(
+      const result = await apiFetch<PayPalAnalytics>(
         "/api/analytics/paypal",
-        { cache: "no-store" }
+        "Failed to load payments",
+        "Please sign in to view PayPal transactions."
       );
-
-      if (!response.ok) {
-        throw new Error(
-          response.status === 401
-            ? "Please sign in to view PayPal transactions."
-            : `Failed to load payments (${response.status})`
-        );
-      }
-
-      const result: PayPalAnalytics =
-        await response.json();
 
       setData(result);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Unable to load payments"
-      );
+      setError(getErrorMessage(err, "Unable to load payments"));
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    void loadPayments();
-  }, [loadPayments]);
+    let active = true;
+
+    apiFetch<PayPalAnalytics>(
+      "/api/analytics/paypal",
+      "Failed to load payments",
+      "Please sign in to view PayPal transactions."
+    )
+      .then((result) => {
+        if (active) {
+          setData(result);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setError(
+            getErrorMessage(err, "Unable to load payments")
+          );
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <section className="space-y-6">

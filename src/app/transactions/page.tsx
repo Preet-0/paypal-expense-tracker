@@ -3,6 +3,10 @@
 
 
 import PayPalTransactions from "@/components/PayPalTransactions";
+import {
+  apiFetch,
+  getErrorMessage,
+} from "@/lib/api-client";
 
 import {
   AlertCircle,
@@ -52,40 +56,65 @@ export default function TransactionsPage() {
     setError("");
 
     try {
-      const [transactionResponse, categoryResponse] =
+      const [transactionData, categoryData] =
         await Promise.all([
-          fetch("/api/transactions", { cache: "no-store" }),
-          fetch("/api/categories", { cache: "no-store" }),
+          apiFetch<{ transactions: Transaction[] }>(
+            "/api/transactions",
+            "Unable to load transaction data.",
+            "Please sign in to view your transactions."
+          ),
+          apiFetch<{ categories: Category[] }>(
+            "/api/categories",
+            "Unable to load transaction data.",
+            "Please sign in to view your transactions."
+          ),
         ]);
-
-      if (
-        transactionResponse.status === 401 ||
-        categoryResponse.status === 401
-      ) {
-        throw new Error("Please sign in to view your transactions.");
-      }
-
-      if (!transactionResponse.ok || !categoryResponse.ok) {
-        throw new Error("Unable to load transaction data.");
-      }
-
-      const transactionData = await transactionResponse.json();
-      const categoryData = await categoryResponse.json();
 
       setTransactions(transactionData.transactions);
       setCategories(categoryData.categories);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Something went wrong"
-      );
+      setError(getErrorMessage(err, "Something went wrong"));
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    void loadData();
-  }, [loadData]);
+    let active = true;
+
+    Promise.all([
+      apiFetch<{ transactions: Transaction[] }>(
+        "/api/transactions",
+        "Unable to load transaction data.",
+        "Please sign in to view your transactions."
+      ),
+      apiFetch<{ categories: Category[] }>(
+        "/api/categories",
+        "Unable to load transaction data.",
+        "Please sign in to view your transactions."
+      ),
+    ])
+      .then(([transactionData, categoryData]) => {
+        if (active) {
+          setTransactions(transactionData.transactions);
+          setCategories(categoryData.categories);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setError(getErrorMessage(err, "Something went wrong"));
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     return transactions.filter((transaction) => {

@@ -2,7 +2,7 @@
 import { auth } from "@/auth";
 import { paypalRequest } from "@/lib/paypal";
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { connection, NextResponse } from "next/server";
 
 type PayPalOrderDetails = {
   id: string;
@@ -25,6 +25,8 @@ type PayPalOrderDetails = {
 };
 
 export async function GET() {
+  await connection();
+
   try {
     const session = await auth();
     const userId = session?.user?.id;

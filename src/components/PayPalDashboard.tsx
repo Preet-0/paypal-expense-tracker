@@ -2,6 +2,10 @@
 "use client";
 
 import {
+  apiFetch,
+  getErrorMessage,
+} from "@/lib/api-client";
+import {
     ArrowUpRight,
     CreditCard,
     ReceiptText,
@@ -52,28 +56,16 @@ export default function PayPalDashboard() {
     setError("");
 
     try {
-      const response = await fetch(
+      const result = await apiFetch<PayPalAnalytics>(
         "/api/analytics/paypal",
-        { cache: "no-store" }
+        "Unable to load PayPal data",
+        "Please sign in to view PayPal analytics."
       );
-
-      if (!response.ok) {
-        throw new Error(
-          response.status === 401
-            ? "Please sign in to view PayPal analytics."
-            : `Unable to load PayPal data (${response.status})`
-        );
-      }
-
-      const result: PayPalAnalytics =
-        await response.json();
 
       setData(result);
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Unable to load PayPal analytics"
+        getErrorMessage(err, "Unable to load PayPal analytics")
       );
     } finally {
       setLoading(false);
@@ -81,8 +73,35 @@ export default function PayPalDashboard() {
   }, []);
 
   useEffect(() => {
-    void loadAnalytics();
-  }, [loadAnalytics]);
+    let active = true;
+
+    apiFetch<PayPalAnalytics>(
+      "/api/analytics/paypal",
+      "Unable to load PayPal data",
+      "Please sign in to view PayPal analytics."
+    )
+      .then((result) => {
+        if (active) {
+          setData(result);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setError(
+            getErrorMessage(err, "Unable to load PayPal analytics")
+          );
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const cards = data
     ? [

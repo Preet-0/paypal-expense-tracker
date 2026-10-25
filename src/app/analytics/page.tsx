@@ -3,6 +3,10 @@
 
 import ExpenseInsights from "@/components/ExpenseInsights";
 import PayPalMonthlyChart from "@/components/PayPalMonthlyChart";
+import {
+  apiFetch,
+  getErrorMessage,
+} from "@/lib/api-client";
 
 import {
   Activity,
@@ -339,39 +343,48 @@ export default function AnalyticsPage() {
     setError("");
 
     try {
-      const response = await fetch(
+      const result = await apiFetch<Analytics>(
         "/api/analytics",
-        {
-          cache: "no-store",
-        }
+        "Failed to load analytics.",
+        "Please sign in to view analytics."
       );
-
-      if (!response.ok) {
-        throw new Error(
-          response.status === 401
-            ? "Please sign in to view analytics."
-            : "Failed to load analytics."
-        );
-      }
-
-      const result: Analytics =
-        await response.json();
 
       setData(result);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong"
-      );
+      setError(getErrorMessage(err, "Something went wrong"));
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    void loadAnalytics();
-  }, [loadAnalytics]);
+    let active = true;
+
+    apiFetch<Analytics>(
+      "/api/analytics",
+      "Failed to load analytics.",
+      "Please sign in to view analytics."
+    )
+      .then((result) => {
+        if (active) {
+          setData(result);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setError(getErrorMessage(err, "Something went wrong"));
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const now = data?.generatedAt
   ? new Date(data.generatedAt)

@@ -164,11 +164,6 @@ if (!expectedMerchantId) {
   );
 }
 
-const purchaseUnits = order.purchase_units ?? [];
-
-
-
-
 const orderDetails = await getPayPalOrder(orderId);
 
 const detailPurchaseUnits =
