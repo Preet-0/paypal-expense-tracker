@@ -17,6 +17,28 @@ PayTrack is a full-stack expense tracking application that integrates PayPal San
 - **Financial Insights:** View rule-based spending observations, month-over-month comparisons, and illustrative savings opportunities.
 - **Responsive Dashboard:** Modern, violet-themed interface for tracking expenses.
 
+## Screenshots
+
+### Dashboard
+Track your expenses and view your financial overview.
+
+![PayTrack Dashboard](public/screenshots/dashboard.png)
+
+### PayPal Sandbox Payments
+Complete test payments through PayPal Sandbox.
+
+![PayTrack Payment](public/screenshots/payment.png)
+
+### Unified Transactions
+View manual expenses and PayPal payments in one place.
+
+![PayTrack Transactions](public/screenshots/transactions.png)
+
+### Interactive Analytics
+Explore spending trends, category breakdowns, and financial insights.
+
+![PayTrack Analytics](public/screenshots/analytics.png)
+
 ## Tech Stack
 
 | Layer | Technology |
