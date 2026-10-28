@@ -39,6 +39,38 @@ Explore spending trends, category breakdowns, and financial insights.
 
 ![PayTrack Analytics](public/screenshots/analytics.png)
 
+## System Architecture
+
+PayTrack is built with Next.js and deployed on Vercel. It uses GitHub OAuth for authentication, PayPal Sandbox for payment processing, and Prisma with Neon PostgreSQL for persistent storage.
+
+```mermaid
+flowchart TD
+    A["User / Browser"] --> B["Next.js Application on Vercel"]
+
+    B --> C["Auth.js v5"]
+    C --> D["GitHub OAuth"]
+
+    B --> E["Next.js API Routes"]
+    E --> F["PayPal Sandbox API"]
+    E --> G["Prisma ORM"]
+    C --> G
+    G --> H[("Neon PostgreSQL")]
+
+    E --> I["Analytics & Financial Insights"]
+    I --> B
+```
+
+### Payment and Expense Flow
+
+1. A user signs in using GitHub OAuth.
+2. The user creates a manual expense or initiates a PayPal Sandbox payment.
+3. Next.js API routes validate and process the request.
+4. Completed transactions are saved in PostgreSQL using Prisma.
+5. Analytics combines completed manual and PayPal transactions in USD.
+6. Interactive charts and financial insights display the updated spending data.
+
+PayPal orders and mirrored transactions are not counted twice in spending totals.
+
 ## Tech Stack
 
 | Layer | Technology |
