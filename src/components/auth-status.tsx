@@ -1,8 +1,10 @@
+
 "use client";
 
 import { signOutAction } from "@/app/auth-actions";
 import { LogIn, LogOut, UserRound } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type Session = {
@@ -13,38 +15,52 @@ type Session = {
 } | null;
 
 export default function AuthStatus() {
+  const pathname = usePathname();
+
   const [session, setSession] = useState<Session>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let active = true;
+    const controller = new AbortController();
 
-    fetch("/api/auth/session", { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data: Session) => {
-        if (active) {
+    async function refreshSession() {
+      try {
+        const response = await fetch("/api/auth/session", {
+          cache: "no-store",
+          credentials: "same-origin",
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to load session");
+        }
+
+        const data: Session = await response.json();
+
+        if (!controller.signal.aborted) {
           setSession(data);
         }
-      })
-      .catch(() => {
-        if (active) {
+      } catch {
+        if (!controller.signal.aborted) {
           setSession(null);
         }
-      })
-      .finally(() => {
-        if (active) {
+      } finally {
+        if (!controller.signal.aborted) {
           setLoading(false);
         }
-      });
+      }
+    }
+
+    void refreshSession();
 
     return () => {
-      active = false;
+      controller.abort();
     };
-  }, []);
+  }, [pathname]);
 
   if (loading) {
     return (
-      <p className="text-[11px] text-slate-600">
+      <p className="text-[11px] text-slate-500">
         Checking session…
       </p>
     );
@@ -66,8 +82,11 @@ export default function AuthStatus() {
     <div className="space-y-2">
       <div className="flex items-center gap-2 text-slate-400">
         <UserRound size={15} />
+
         <span className="truncate text-xs">
-          {session.user.email ?? session.user.name ?? "Signed in"}
+          {session.user.name ??
+            session.user.email ??
+            "Signed in"}
         </span>
       </div>
 
