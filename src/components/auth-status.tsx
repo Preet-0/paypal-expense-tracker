@@ -2,8 +2,7 @@
 "use client";
 
 import { signOutAction } from "@/app/auth-actions";
-import { LogIn, LogOut, UserRound } from "lucide-react";
-import Link from "next/link";
+import { LogOut, UserRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -67,15 +66,7 @@ export default function AuthStatus() {
   }
 
   if (!session?.user) {
-    return (
-      <Link
-        href="/login"
-        className="flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
-      >
-        <LogIn size={16} />
-        Sign in
-      </Link>
-    );
+    return null;
   }
 
   return (

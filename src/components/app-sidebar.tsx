@@ -1,6 +1,7 @@
 
 "use client";
 
+import WorkspaceAccess from "@/components/workspace-access";
 import {
   ArrowUpRight,
   CreditCard,
@@ -105,6 +106,8 @@ export default function AppSidebar() {
           Workspace
         </p>
 
+        <WorkspaceAccess>
+
         <nav
           aria-label="Main navigation"
           className="space-y-1.5"
@@ -153,6 +156,7 @@ export default function AppSidebar() {
           })}
         </nav>
 
+
         {/* Smart Insights Card */}
         <div className="mt-9 rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-600/15 to-indigo-600/10 p-4">
           <div className="mb-3 flex items-center gap-2">
@@ -181,9 +185,10 @@ export default function AppSidebar() {
             Explore Insights
             <ArrowUpRight size={14} />
           </Link>
-        </div>
+        </div></WorkspaceAccess>
       </div>
-
+      
+      
       {/* Footer */}
       <div className="border-t border-white/10 px-6 py-5">
         <div className="mb-4">
