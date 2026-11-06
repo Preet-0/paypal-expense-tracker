@@ -178,7 +178,7 @@ export default function AppSidebar() {
           </p>
 
           <Link
-            href="/analytics"
+            href="/analytics#financial-intelligence"
             onClick={closeMobileMenu}
             className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-violet-300 transition hover:text-violet-200"
           >

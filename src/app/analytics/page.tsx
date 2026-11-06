@@ -948,11 +948,16 @@ const categoryChartData = data
         </div>
       )}
 
-      {/* Existing Financial Intelligence */}
-      <ExpenseInsights />
+{/* Existing Financial Intelligence */}
+<div
+  id="financial-intelligence"
+  className="scroll-mt-8"
+>
+  <ExpenseInsights />
+</div>
 
-      {/* Existing PayPal Monthly Chart */}
-      <PayPalMonthlyChart />
+{/* Existing PayPal Monthly Chart */}
+<PayPalMonthlyChart />
     </div>
   );
 }
